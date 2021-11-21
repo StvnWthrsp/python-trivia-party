@@ -11,6 +11,6 @@ artifacts:
  type: zip
  files:
   - template.yaml
-  - src/index.py
-  - package/*
- discard-paths: yes
+  - index.py
+  - package/**/*
+ discard-paths: no
