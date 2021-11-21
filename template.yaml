@@ -10,7 +10,7 @@ Resources:
  PythonTriviaPartyFunction:
   Type: AWS::Serverless::Function
   Properties:
-    Handler: Index.lambda_handler
+    Handler: index.lambda_handler
     Runtime: python3.7
     FunctionName: PythonTriviaPartyFunction
     CodeUri:

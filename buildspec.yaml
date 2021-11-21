@@ -8,3 +8,4 @@ artifacts:
  files:
   - template.yaml
   - src/index.py
+  discard-paths: yes
