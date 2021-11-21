@@ -6,8 +6,7 @@ phases:
  build: 
   commands:
    - sam build
-   - export BUCKET=python-trivia-party
-   - sam package --s3-bucket $BUCKET --output-template-file outputtemplate.yaml
+   - sam package --s3-bucket python-trivia-party --output-template-file outputtemplate.yaml
 artifacts:
  type: zip
  files:
