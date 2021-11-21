@@ -1,11 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Python file including external library
-Parameters:
-  BucketName:
-    Type: String
-  ObjectKey:
-    Type: String
 Resources:
  PythonTriviaPartyFunction:
   Type: AWS::Serverless::Function
@@ -13,11 +8,7 @@ Resources:
     Handler: Index.lambda_handler
     Runtime: python3.7
     FunctionName: PythonTriviaPartyFunction
-    CodeUri:
-      Bucket:
-        Ref: BucketName
-      Key:
-        Ref: ObjectKey
+    CodeUri: ./src
     Events:
       AlexaTrigger:
         Type: AlexaSkill
