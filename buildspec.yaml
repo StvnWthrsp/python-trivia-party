@@ -3,9 +3,14 @@ phases:
  install:
   runtime-versions:
    python: 3.7
+ build:
+    commands:
+      - echo Entered the build phase...
+      - pip install --target ./package -r requirements.txt
 artifacts:
  type: zip
  files:
   - template.yaml
   - src/index.py
+  - package/*
  discard-paths: yes

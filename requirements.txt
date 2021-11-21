@@ -1,0 +1,2 @@
+testresources
+ask-sdk
