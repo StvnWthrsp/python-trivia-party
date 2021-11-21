@@ -3,12 +3,8 @@ phases:
  install:
   runtime-versions:
    python: 3.7
- build: 
-  commands:
-   - sam build
-   - sam package --s3-bucket python-trivia-party --output-template-file outputtemplate.yaml
 artifacts:
  type: zip
  files:
   - template.yaml
-  - outputtemplate.yaml
+  - src/index.py
