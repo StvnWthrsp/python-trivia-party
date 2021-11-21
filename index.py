@@ -24,7 +24,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         r = requests.get(url = URL)
         data = r.json()
 
-        speech_text = data
+        speech_text = data["results"][0]["question"]
 
         sessionAttributes = {}
         sessionAttributes["questions"] = 25
