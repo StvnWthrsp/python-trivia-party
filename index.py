@@ -1,4 +1,5 @@
 import sys
+import requests
 sys.path.append('./package')
 
 from ask_sdk_core.skill_builder import SkillBuilder
@@ -17,11 +18,21 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "Welcome to the Alexa Skills Kit, you can say hello!"
+        speech_text = "Welcome to Trivia Party! We'll start with 10 questions."
 
-        handler_input.response_builder.speak(speech_text).set_card(
-            SimpleCard("Hello World", speech_text)).set_should_end_session(
-            False)
+        URL = "https://opentdb.com/api.php?amount=10"
+        r = requests.get(url = URL)
+        data = r.json()
+
+        speech_text = data
+
+        sessionAttributes = {}
+        sessionAttributes["questions"] = 25
+
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .set_card(SimpleCard("Hello World", speech_text))\
+            .set_should_end_session(False)
         return handler_input.response_builder.response
 
         
