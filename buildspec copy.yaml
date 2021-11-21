@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+ install:
+  runtime-versions:
+   python: 3.7
+artifacts:
+ type: zip
+ files:
+  - template.yaml
+  - src/index.py
+ discard-paths: yes

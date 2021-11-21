@@ -8,12 +8,16 @@ Parameters:
     Type: String
 Resources:
  PythonTriviaPartyFunction:
-  Type: AWS::Lambda::Function 
+  Type: AWS::Serverless::Function
   Properties:
-    PackageType: Image
-    Code:
-      ImageUri:
-        Ref: ImageURI
     Handler: index.lambda_handler
     Runtime: python3.7
     FunctionName: PythonTriviaPartyFunction
+    CodeUri:
+      Bucket:
+        Ref: BucketName
+      Key:
+        Ref: ObjectKey
+    Events:
+      AlexaTrigger:
+        Type: AlexaSkill
