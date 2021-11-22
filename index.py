@@ -27,23 +27,23 @@ def getGameQuestions(category_number, number_questions):
 def getCategoryId(category_string):
     if category_string == "general":
         return 9
-    elif category_string == "books"
+    elif category_string == "books":
         return 10
-    elif category_string == "film"
+    elif category_string == "film":
         return 11
-    elif category_string == "music"
+    elif category_string == "music":
         return 12
-    elif category_string == "television" or category_string == "TV"
+    elif category_string == "television" or category_string == "TV":
         return 14
-    elif category_string == "video games"
+    elif category_string == "video games":
         return 15
-    elif category_string == "science"
+    elif category_string == "science":
         return 17
-    elif category_string == "math"
+    elif category_string == "math":
         return 19
-    elif category_string == "history"
+    elif category_string == "history":
         return 23
-    elif category_string == "geography"
+    elif category_string == "geography":
         return 22
     elif category_string == "animal" or category_string == "animals":
         return 27
