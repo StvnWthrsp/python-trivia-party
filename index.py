@@ -30,7 +30,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         r = requests.get(url = URL)
         data = r.json()
 
-        speech_text = data["results"][0]["question"]
+        # speech_text = data["results"][0]["question"]
 
         session_attributes = {
             'speech_text': reprompt_text,
@@ -91,13 +91,12 @@ class NameRequestHandler(AbstractRequestHandler):
         else:
             session_attributes["players"].append(player_name)
             speech_text = f"Got it, {player_name}, you're in. "
-        
-        handler_input.response_builder\
-            .speak(speech_text)\
-            .ask(reprompt_text)\
-            .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
-            .set_should_end_session(False)
-        return handler_input.response_builder.response
+            handler_input.response_builder\
+                .speak(speech_text)\
+                .ask(reprompt_text)\
+                .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
+                .set_should_end_session(False)
+            return handler_input.response_builder.response
 
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(NameRequestHandler())
