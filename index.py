@@ -65,9 +65,11 @@ class NameRequestHandler(AbstractRequestHandler):
             num_players = 0
 
         player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
+        speech_text = "What is the next player's name? "
         reprompt_text = "What is the next player's name? "
         if num_players == 0:
-            reprompt_text = "What is the next player's name?  Whenever all players are in, say, \"No more players\"."
+            speech_text = "What is the next player's name? Whenever all players are in, say, \"No more players\"."
+            reprompt_text = "What is the next player's name? Whenever all players are in, say, \"No more players\"."
 
         elif num_players == 3:
             session_attributes["players"].append(player_name)
@@ -93,17 +95,11 @@ class NameRequestHandler(AbstractRequestHandler):
         else:
             session_attributes["players"].append(player_name)
             speech_text = f"Got it, {player_name}, you're in. "
-            handler_input.response_builder\
-                .speak(speech_text)\
-                .ask(reprompt_text)\
-                .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
-                .set_should_end_session(False)
-            return handler_input.response_builder.response
 
         handler_input.response_builder\
-            .speak("Sorry, something went wrong. ")\
+            .speak(speech_text)\
             .ask(reprompt_text)\
-            .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
+            .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
