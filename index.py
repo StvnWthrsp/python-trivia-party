@@ -16,12 +16,18 @@ from ask_sdk_model.ui import SimpleCard
 SKILL_NAME = "Trivia Party"
 NUMBER_OF_QUESTIONS = 5
 
-def getGameQuestions(category, number):
-    URL = "https://opentdb.com/api.php?amount=10"
+def getGameQuestions(category_number, number_questions):
+    URL = f"https://opentdb.com/api.php?amount={number_questions}&category={category_number}"
     r = requests.get(url = URL)
     data = r.json()
 
     return data["results"][0]["question"]
+
+def getCategoryNumber(category_string):
+    if category_string == "General":
+        return 9
+    elif category_string == "Music":
+        return 12
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -53,7 +59,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 class NameIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return is_intent_name("NameIntent")\
+        return is_intent_name("NameIntent")(handler_input)\
             and handler_input.attributes_manager.session_attributes["game_state"] == "PLAYERS"
 
     def handle(self, handler_input):
@@ -63,9 +69,8 @@ class NameIntentHandler(AbstractRequestHandler):
         else:
             session_attributes["players"] = []
             num_players = 0
-        player_name = "Null"
-        if "FirstName" in handler_input.request_envelope.request.intent.slots:
-            player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
+
+        player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
         speech_text = f"Got it, {player_name}, you're in. What is the next player's name? "
         reprompt_text = "What is the next player's name? "
         session_attributes["players"].append(player_name)
@@ -103,7 +108,7 @@ class NameIntentHandler(AbstractRequestHandler):
 class AnswerIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return is_intent_name("AnswerIntent")\
+        return is_intent_name("AnswerIntent")(handler_input)\
             and handler_input.attributes_manager.session_attributes["game_state"] == "STARTED"
 
     def handle(self, handler_input):
@@ -112,7 +117,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
 class PlayersDoneIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return is_intent_name("PlayersDone")\
+        return is_intent_name("PlayersDone")(handler_input)\
             and handler_input.attributes_manager.session_attributes["game_state"] == "PLAYERS"
 
     def handle(self, handler_input):
