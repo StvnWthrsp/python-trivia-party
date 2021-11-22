@@ -65,14 +65,12 @@ class NameRequestHandler(AbstractRequestHandler):
             num_players = 0
 
         player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
-        speech_text = "What is the next player's name? "
+        speech_text = f"Got it, {player_name}, you're in. What is the next player's name? "
         reprompt_text = "What is the next player's name? "
-        if num_players == 0:
-            speech_text = "What is the next player's name? Whenever all players are in, say, \"No more players\"."
-            reprompt_text = "What is the next player's name? Whenever all players are in, say, \"No more players\"."
+        session_attributes["players"].append(player_name)
+        num_players += 1
 
-        elif num_players == 3:
-            session_attributes["players"].append(player_name)
+        if num_players == 4:
             speech_text = f"Got it, {player_name}, you're in. You've reached the maximum number of 4 players. Which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
             reprompt_text = "Which category would you like to play? You can also play general trivia. "
             session_attributes["game_state"] = "CATEGORY"
@@ -83,7 +81,7 @@ class NameRequestHandler(AbstractRequestHandler):
                 .set_should_end_session(False)
             return handler_input.response_builder.response
 
-        elif num_players == 4:
+        elif num_players > 4:
             speech_text = "Sorry, something went wrong. Please try again. "
             handler_input.response_builder\
                 .speak(speech_text)\
@@ -91,10 +89,6 @@ class NameRequestHandler(AbstractRequestHandler):
                 .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
                 .set_should_end_session(False)
             return handler_input.response_builder.response
-        
-        else:
-            session_attributes["players"].append(player_name)
-            speech_text = f"Got it, {player_name}, you're in. "
 
         handler_input.response_builder\
             .speak(speech_text)\
