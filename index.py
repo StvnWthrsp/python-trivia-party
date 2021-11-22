@@ -63,8 +63,9 @@ class NameIntentHandler(AbstractRequestHandler):
         else:
             session_attributes["players"] = []
             num_players = 0
-
-        player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
+        player_name = "Null"
+        if "FirstName" in handler_input.request_envelope.request.intent.slots:
+            player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
         speech_text = f"Got it, {player_name}, you're in. What is the next player's name? "
         reprompt_text = "What is the next player's name? "
         session_attributes["players"].append(player_name)
