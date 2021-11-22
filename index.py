@@ -1,6 +1,7 @@
 import sys
 import requests
 from requests.sessions import session
+from random import shuffle
 sys.path.append('./package')
 
 from ask_sdk_core.skill_builder import SkillBuilder
@@ -21,13 +22,33 @@ def getGameQuestions(category_number, number_questions):
     r = requests.get(url = URL)
     data = r.json()
 
-    return data["results"][0]["question"]
+    return data["results"]
 
-def getCategoryNumber(category_string):
-    if category_string == "General":
+def getCategoryId(category_string):
+    if category_string == "general":
         return 9
-    elif category_string == "Music":
+    elif category_string == "books"
+        return 10
+    elif category_string == "film"
+        return 11
+    elif category_string == "music"
         return 12
+    elif category_string == "television" or category_string == "TV"
+        return 14
+    elif category_string == "video games"
+        return 15
+    elif category_string == "science"
+        return 17
+    elif category_string == "math"
+        return 19
+    elif category_string == "history"
+        return 23
+    elif category_string == "geography"
+        return 22
+    elif category_string == "animal" or category_string == "animals":
+        return 27
+    else
+        return -1
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -137,6 +158,50 @@ class PlayersDoneIntentHandler(AbstractRequestHandler):
             .speak(speech_text)\
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
+
+class CategoryIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("CategoryIntent")(handler_input)\
+            and handler_input.attributes_manager.session_attributes["game_state"] == "CATEGORY"
+
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+
+        # Get category ID from string in the intent's slot
+        category_string = handler_input.request_envelope.request.intent.slots["Category"].value
+        category_id = getCategoryId(category_string)
+        if category_id < 0:
+            speech_text = "Sorry, something went wrong. Please choose a valid category. "
+            reprompt_text = "Which category would you like to play? You ccan also play general trivia. "
+            handler_input.response_builder\
+                .speak(speech_text)\
+                .ask(reprompt_text)\
+                .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
+                .set_should_end_session(False)
+            return handler_input.response_builder.response
+            
+        # Save questions and current index to session attributes
+        session_attrributes['game_questions'] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes["players"])
+        session_attributes['current_question_index'] = 0
+
+        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attrributes['game_questions'][0]["question"]} "
+        reprompt_text = f"{session_attrributes['game_questions'][0]["question"]} "
+
+        possible_answers = session_attrributes['game_questions'][0]["incorrect_answers"].append(session_attrributes['game_questions'][0]["correct_answer"])
+        shuffled_answers = shuffle(possible_answers)
+        correct_index = shuffled_answers.index(session_attrributes['game_questions'][0]["correct_answer"])
+
+        for answer in shuffled_answers:
+            reprompt_text += f"{shuffled_answers.index(answer)}. {answer} "
+        speech_text += reprompt_text
+        
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
