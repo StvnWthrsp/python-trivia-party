@@ -47,7 +47,7 @@ def getCategoryId(category_string):
         return 22
     elif category_string == "animal" or category_string == "animals":
         return 27
-    else
+    else:
         return -1
 
 
