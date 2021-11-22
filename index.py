@@ -16,6 +16,14 @@ from ask_sdk_model.ui import SimpleCard
 SKILL_NAME = "Trivia Party"
 NUMBER_OF_QUESTIONS = 5
 
+def getGameQuestions(category, number):
+    URL = "https://opentdb.com/api.php?amount=10"
+    r = requests.get(url = URL)
+    data = r.json()
+
+    return data["results"][0]["question"]
+
+
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
@@ -23,14 +31,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = f"Welcome to {SKILL_NAME}! This game can be played with one to four players. I will ask each of you {NUMBER_OF_QUESTIONS} questions, try to get as many right as you can. Just respond with the number of your answer. If you need me to repeat anything, say, repeat. Ready? Let\'s begin. "
+        speech_text = f"Welcome to {SKILL_NAME}! This game can be played with one to four players. I will ask each of you {NUMBER_OF_QUESTIONS} questions, try to get as many right as you can. Just respond with the number of your answer. If you need me to repeat anything, say, repeat. Ready? Let\'s begin. What is the first player's name? "
         reprompt_text = "What is the first player's name? "
-
-        URL = "https://opentdb.com/api.php?amount=10"
-        r = requests.get(url = URL)
-        data = r.json()
-
-        # speech_text = data["results"][0]["question"]
 
         session_attributes = {
             'speech_text': reprompt_text,
@@ -97,6 +99,13 @@ class NameRequestHandler(AbstractRequestHandler):
                 .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
                 .set_should_end_session(False)
             return handler_input.response_builder.response
+
+        handler_input.response_builder\
+            .speak("Sorry, something went wrong. ")\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
 
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(NameRequestHandler())
