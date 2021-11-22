@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 src/index_old.py
+Dockerfile
+entry.sh
