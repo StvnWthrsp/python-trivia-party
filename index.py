@@ -50,7 +50,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
-class NameRequestHandler(AbstractRequestHandler):
+class NameIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_intent_name("NameIntent")\
@@ -70,7 +70,9 @@ class NameRequestHandler(AbstractRequestHandler):
         session_attributes["players"].append(player_name)
         num_players += 1
 
-        if num_players == 4:
+        if num_players == 1:
+            speech_text = f"Got it, {player_name}, you're in. What is the next player's name? When all players are entered, say, \"no more players.\""
+        elif num_players == 4:
             speech_text = f"Got it, {player_name}, you're in. You've reached the maximum number of 4 players. Which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
             reprompt_text = "Which category would you like to play? You can also play general trivia. "
             session_attributes["game_state"] = "CATEGORY"
@@ -97,6 +99,43 @@ class NameRequestHandler(AbstractRequestHandler):
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
+class AnswerIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("AnswerIntent")\
+            and handler_input.attributes_manager.session_attributes["game_state"] == "STARTED"
+
+    def handle(self, handler_input):
+        return
+
+class PlayersDoneIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("PlayersDone")\
+            and handler_input.attributes_manager.session_attributes["game_state"] == "PLAYERS"
+
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        speech_text = ""
+        if len(session_attributes["players"]) == 1:
+            speech_text = f"Okay, we'll play with 1 player. Next, which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
+        else:
+            speech_text = f"Okay, we'll play with {len(session_attributes['players'])} players. Next, which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
+        reprompt_text = "Which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
+        
+        session_attributes["game_state"] = "CATEGORY"
+        session_attributes["speech_text"] = speech_text
+        session_attributes["reprompt_text"] = reprompt_text
+
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
+
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(NameRequestHandler())
+sb.add_request_handler(NameIntentHandler())
+sb.add_request_handler(AnswerIntentHandler())
+sb.add_request_handler(PlayersDoneIntentHandler())
 lambda_handler = sb.lambda_handler()
