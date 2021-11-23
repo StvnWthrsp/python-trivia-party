@@ -190,12 +190,13 @@ class CategoryIntentHandler(AbstractRequestHandler):
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attributes['game_questions'][0]['question']} "
         reprompt_text = f"{session_attributes['game_questions'][0]['question']} "
 
-        possible_answers = session_attributes['game_questions'][0]["incorrect_answers"].append(session_attributes['game_questions'][0]["correct_answer"])
-        shuffled_answers = shuffle(possible_answers)
-        correct_index = shuffled_answers.index(session_attributes['game_questions'][0]["correct_answer"])
+        possible_answers = session_attributes['game_questions'][0]["incorrect_answers"]
+        possible_answers.append(session_attributes['game_questions'][0]["correct_answer"])
+        shuffle(possible_answers)
+        correct_index = possible_answers.index(session_attributes['game_questions'][0]["correct_answer"])
 
-        for answer in shuffled_answers:
-            reprompt_text += f"{shuffled_answers.index(answer)}. {answer} "
+        for answer in possible_answers:
+            reprompt_text += f"{possible_answers.index(answer)}. {answer} "
         speech_text += reprompt_text
         
         handler_input.response_builder\
