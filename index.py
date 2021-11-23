@@ -187,12 +187,12 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes["game_questions"] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes["players"]))
         session_attributes["current_question_index"] = 0
 
-        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attrributes['game_questions'][0]['question']} "
-        reprompt_text = f"{session_attrributes['game_questions'][0]['question']} "
+        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attributes['game_questions'][0]['question']} "
+        reprompt_text = f"{session_attributes['game_questions'][0]['question']} "
 
-        possible_answers = session_attrributes['game_questions'][0]["incorrect_answers"].append(session_attrributes['game_questions'][0]["correct_answer"])
+        possible_answers = session_attributes['game_questions'][0]["incorrect_answers"].append(session_attributes['game_questions'][0]["correct_answer"])
         shuffled_answers = shuffle(possible_answers)
-        correct_index = shuffled_answers.index(session_attrributes['game_questions'][0]["correct_answer"])
+        correct_index = shuffled_answers.index(session_attributes['game_questions'][0]["correct_answer"])
 
         for answer in shuffled_answers:
             reprompt_text += f"{shuffled_answers.index(answer)}. {answer} "
