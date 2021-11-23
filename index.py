@@ -290,6 +290,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes['current_question_index'] = 0
         session_attributes['current_player_index'] = 0
         session_attributes['scores'] = [0, 0, 0, 0]
+        session_attributes['game_state'] = "STARTED"
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
         speech_text += readQuestionAndShuffledAnswers(handler_input)
