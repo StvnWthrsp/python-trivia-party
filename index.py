@@ -61,7 +61,7 @@ def handleUserGuess(handler_input):
         session_attributes['scores'][player_index] += 1
         speech_text = f"That answer is correct! "
     else:
-        speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']} "
+        speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']}. "
 
     # Check if we need to go back to the first player
     if player_index == (len(session_attributes['players']) - 1):
@@ -105,7 +105,7 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes['correct_index'] = correct_index
 
     for answer in possible_answers:
-        reprompt_text += f"{possible_answers.index(answer)+1}. {answer} "
+        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}. "
     speech_text += reprompt_text
     return speech_text
 
@@ -234,7 +234,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
         handler_input.response_builder\
             .speak(speech_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
-            .set_should_end_session(True)
+            .set_should_end_session(False)
         return handler_input.response_builder.response
 
 class PlayersDoneIntentHandler(AbstractRequestHandler):
