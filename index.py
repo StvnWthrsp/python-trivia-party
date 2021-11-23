@@ -53,15 +53,15 @@ def getCategoryId(category_string):
 def handleUserGuess(handler_input):
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
-    correct_index = session_attributes['correct_index']
+    correct_answer = session_attributes['correct_index'] + 1
 
     # Check if player answered correctly, iterate score if so
     player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
-    if player_guess == (correct_index + 1):
+    if player_guess == correct_answer:
         session_attributes['scores'][player_index] += 1
         speech_text = f"That answer is correct! "
     else:
-        speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']}. "
+        speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']}... "
 
     # Check if we need to go back to the first player
     if player_index == (len(session_attributes['players']) - 1):
@@ -76,8 +76,8 @@ def handleUserGuess(handler_input):
         for index, score in enumerate(session_attributes['scores']):
             if score > winning_score:
                 winning_score = score
-                winning_index = index
-        speech_text += f"The game is now over. The winner is {session_attributes['players'][winning_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
+                winner_index = index
+        speech_text += f"The game is now over. The winner is {session_attributes['players'][winner_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
 
         handler_input.response_builder\
             .speak(speech_text)\
