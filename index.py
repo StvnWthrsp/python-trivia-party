@@ -213,7 +213,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
         session_attributes['reprompt_text'] = reprompt_text
         handler_input.response_builder\
             .speak(speech_text)\
-            .ask(reprompt_text)
+            .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
