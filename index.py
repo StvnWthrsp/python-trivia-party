@@ -50,6 +50,30 @@ def getCategoryId(category_string):
     else:
         return -1
 
+def handleUserGuess():
+    player_index = session_attributes['current_player_index']
+    question_index = session_attributes['current_question_index']
+    correct_index = session_attributes['current_index']
+
+    return
+
+def readQuestionAndShuffledAnswers():
+    player_index = session_attributes['current_player_index']
+    question_index = session_attributes['current_question_index']
+    speech_text = f"{session_attributes['players'][player_index]}, you're up first. Question {question_index + 1}. "
+    reprompt_text = f"{session_attributes['game_questions'][question_index]['question']} "
+
+    possible_answers = session_attributes['game_questions'][question_index]['incorrect_answers']
+    possible_answers.append(session_attributes['game_questions'][question_index]['correct_answer'])
+    shuffle(possible_answers)
+    correct_index = possible_answers.index(session_attributes['game_questions'][question_index]['correct_answer'])
+    session_attributes['correct_index'] = correct_index
+
+    for answer in possible_answers:
+        reprompt_text += f"{possible_answers.index(answer)+1}. {answer} "
+    speech_text += reprompt_text
+    return speech_text
+
 
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -81,20 +105,20 @@ class NameIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_intent_name("NameIntent")(handler_input)\
-            and handler_input.attributes_manager.session_attributes["game_state"] == "PLAYERS"
+            and handler_input.attributes_manager.session_attributes['game_state'] == "PLAYERS"
 
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         if "players" in session_attributes:
-            num_players = len(session_attributes["players"])
+            num_players = len(session_attributes['players'])
         else:
-            session_attributes["players"] = []
+            session_attributes['players'] = []
             num_players = 0
 
-        player_name = handler_input.request_envelope.request.intent.slots["FirstName"].value
+        player_name = handler_input.request_envelope.request.intent.slots['FirstName'].value
         speech_text = f"Got it, {player_name}, you're in. What is the next player's name? "
         reprompt_text = "What is the next player's name? "
-        session_attributes["players"].append(player_name)
+        session_attributes['players'].append(player_name)
         num_players += 1
 
         if num_players == 1:
@@ -114,7 +138,7 @@ class NameIntentHandler(AbstractRequestHandler):
             speech_text = "Sorry, something went wrong. Please try again. "
             handler_input.response_builder\
                 .speak(speech_text)\
-                .ask(session_attributes["reprompt_text"])\
+                .ask(session_attributes['reprompt_text'])\
                 .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
                 .set_should_end_session(False)
             return handler_input.response_builder.response
@@ -130,7 +154,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_intent_name("AnswerIntent")(handler_input)\
-            and handler_input.attributes_manager.session_attributes["game_state"] == "STARTED"
+            and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
 
     def handle(self, handler_input):
         return
@@ -139,20 +163,20 @@ class PlayersDoneIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_intent_name("PlayersDone")(handler_input)\
-            and handler_input.attributes_manager.session_attributes["game_state"] == "PLAYERS"
+            and handler_input.attributes_manager.session_attributes['game_state'] == "PLAYERS"
 
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = ""
-        if len(session_attributes["players"]) == 1:
+        if len(session_attributes['players']) == 1:
             speech_text = f"Okay, we'll play with 1 player. Next, which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
         else:
             speech_text = f"Okay, we'll play with {len(session_attributes['players'])} players. Next, which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
         reprompt_text = "Which category would you like to play? If you'd like a list of the categories, say, \"list categories\". You can also play general trivia. "
         
-        session_attributes["game_state"] = "CATEGORY"
-        session_attributes["speech_text"] = speech_text
-        session_attributes["reprompt_text"] = reprompt_text
+        session_attributes['game_state'] = "CATEGORY"
+        session_attributes['speech_text'] = speech_text
+        session_attributes['reprompt_text'] = reprompt_text
 
         handler_input.response_builder\
             .speak(speech_text)\
@@ -165,13 +189,13 @@ class CategoryIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_intent_name("CategoryIntent")(handler_input)\
-            and handler_input.attributes_manager.session_attributes["game_state"] == "CATEGORY"
+            and handler_input.attributes_manager.session_attributes['game_state'] == "CATEGORY"
 
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
 
         # Get category ID from string in the intent's slot
-        category_string = handler_input.request_envelope.request.intent.slots["Category"].value
+        category_string = handler_input.request_envelope.request.intent.slots['Category'].value
         category_id = getCategoryId(category_string)
         if category_id < 0:
             speech_text = "Sorry, something went wrong. Please choose a valid category. "
@@ -184,20 +208,12 @@ class CategoryIntentHandler(AbstractRequestHandler):
             return handler_input.response_builder.response
             
         # Save questions and current index to session attributes
-        session_attributes["game_questions"] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes["players"]))
-        session_attributes["current_question_index"] = 0
+        session_attributes['game_questions'] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes['players']))
+        session_attributes['current_question_index'] = 0
+        session_attributes['current_player_index'] = 0
 
-        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. "
-        reprompt_text = f"{session_attributes['game_questions'][0]['question']} "
-
-        possible_answers = session_attributes['game_questions'][0]["incorrect_answers"]
-        possible_answers.append(session_attributes['game_questions'][0]["correct_answer"])
-        shuffle(possible_answers)
-        correct_index = possible_answers.index(session_attributes['game_questions'][0]["correct_answer"])
-
-        for answer in possible_answers:
-            reprompt_text += f"{possible_answers.index(answer)+1}. {answer} "
-        speech_text += reprompt_text
+        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
+        speech_text += readQuestionAndShuffledAnswers()
         
         handler_input.response_builder\
             .speak(speech_text)\
