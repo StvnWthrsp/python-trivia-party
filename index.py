@@ -195,12 +195,11 @@ class AnswerIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         player_index = session_attributes['current_player_index']
         question_index = session_attributes['current_question_index']
-        correct_answer = session_attributes['correct_index'] + 1
+        correct_index = session_attributes['correct_index']
 
         # Check if player answered correctly, iterate score if so
         player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
-        session_attributes['player_answer'] = player_guess # DEBUG
-        if player_guess == correct_answer:
+        if int(player_guess) == (correct_index + 1):
             session_attributes['scores'][player_index] += 1
             speech_text = f"That answer is correct! "
         else:
@@ -219,8 +218,8 @@ class AnswerIntentHandler(AbstractRequestHandler):
             for index, score in enumerate(session_attributes['scores']):
                 if score > winning_score:
                     winning_score = score
-                    winning_index = index
-            speech_text += f"The game is now over. The winner is {session_attributes['players'][winning_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
+                    winner_index = index
+            speech_text += f"The game is now over. The winner is {session_attributes['players'][winner_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
 
             handler_input.response_builder\
                 .speak(speech_text)\
