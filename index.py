@@ -195,15 +195,16 @@ class AnswerIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         player_index = session_attributes['current_player_index']
         question_index = session_attributes['current_question_index']
-        correct_index = session_attributes['correct_index']
+        correct_answer = session_attributes['correct_index'] + 1
 
         # Check if player answered correctly, iterate score if so
         player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
-        if player_guess == (correct_index + 1):
+        session_attributes['player_answer'] = player_guess # DEBUG
+        if player_guess == correct_answer:
             session_attributes['scores'][player_index] += 1
             speech_text = f"That answer is correct! "
         else:
-            speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']} "
+            speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']}. "
 
         # Check if we need to go back to the first player
         if player_index == (len(session_attributes['players']) - 1):
