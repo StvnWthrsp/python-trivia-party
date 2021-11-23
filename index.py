@@ -188,7 +188,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes["current_question_index"] = 0
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attrributes['game_questions'][0]['question']} "
-        reprompt_text = f"{session_attrributes['game_questions'][0]["question"]} "
+        reprompt_text = f"{session_attrributes['game_questions'][0]['question']} "
 
         possible_answers = session_attrributes['game_questions'][0]["incorrect_answers"].append(session_attrributes['game_questions'][0]["correct_answer"])
         shuffled_answers = shuffle(possible_answers)
