@@ -18,7 +18,7 @@ SKILL_NAME = "Trivia Party"
 NUMBER_OF_QUESTIONS = 5
 
 def getGameQuestions(category_number, number_questions):
-    URL = f"https://opentdb.com/api.php?amount={number_questions}&category={category_number}"
+    URL = f"https://opentdb.com/api.php?amount={number_questions}&category={category_number}&type=multiple"
     r = requests.get(url = URL)
     data = r.json()
 
@@ -187,7 +187,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes["game_questions"] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes["players"]))
         session_attributes["current_question_index"] = 0
 
-        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. {session_attributes['game_questions'][0]['question']} "
+        speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! Question {1}. "
         reprompt_text = f"{session_attributes['game_questions'][0]['question']} "
 
         possible_answers = session_attributes['game_questions'][0]["incorrect_answers"]
@@ -196,7 +196,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         correct_index = possible_answers.index(session_attributes['game_questions'][0]["correct_answer"])
 
         for answer in possible_answers:
-            reprompt_text += f"{possible_answers.index(answer)}. {answer} "
+            reprompt_text += f"{possible_answers.index(answer)+1}. {answer} "
         speech_text += reprompt_text
         
         handler_input.response_builder\
