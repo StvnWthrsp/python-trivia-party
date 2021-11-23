@@ -314,23 +314,7 @@ class FallbackIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         session_attributes = handler_input.attributes_manager.session_attributes
         reprompt_text = session_attributes['reprompt_text']
-        speech_text = f"'Sorry, I didn't understand that. {reprompt_text}"
-        handler_input.response_builder\
-            .speak(speech_text)\
-            .ask(reprompt_text)\
-            .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
-            .set_should_end_session(False)
-        return handler_input.response_builder.response
-
-class UnhandledIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return True
-
-    def handle(self, handler_input):
-        session_attributes = handler_input.attributes_manager.session_attributes
-        reprompt_text = session_attributes['reprompt_text']
-        speech_text = f"'Sorry, I didn't understand that. {reprompt_text}"
+        speech_text = f"Sorry, I didn't understand that. {reprompt_text}"
         handler_input.response_builder\
             .speak(speech_text)\
             .ask(reprompt_text)\
@@ -437,6 +421,22 @@ class CancelIntentHandler(AbstractRequestHandler):
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
+class UnhandledIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return True
+
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        reprompt_text = session_attributes['reprompt_text']
+        speech_text = f"Sorry, I didn't understand that. {reprompt_text}"
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
+        
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_request_handler(NameIntentHandler())
@@ -445,10 +445,10 @@ sb.add_request_handler(PlayersDoneIntentHandler())
 sb.add_request_handler(CategoryIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
-sb.add_request_handler(UnhandledIntentHandler())
 sb.add_request_handler(RepeatIntentHandler())
 sb.add_request_handler(YesIntentHandler())
 sb.add_request_handler(NoIntentHandler())
 sb.add_request_handler(StopIntentHandler())
 sb.add_request_handler(CancelIntentHandler())
+sb.add_request_handler(UnhandledIntentHandler())
 lambda_handler = sb.lambda_handler()
