@@ -61,7 +61,7 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes = handler_input.attributes_manager.session_attributes
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
-    speech_text = f"{session_attributes['players'][player_index]}, you're up first. Question {question_index + 1}. "
+    speech_text = f"{session_attributes['players'][player_index]}, it's your turn. Question {question_index + 1}. "
     reprompt_text = f"{session_attributes['game_questions'][question_index]['question']} "
 
     possible_answers = session_attributes['game_questions'][question_index]['incorrect_answers']
@@ -215,6 +215,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
         speech_text += readQuestionAndShuffledAnswers(handler_input)
+        reprompt_text = speech_text
         
         handler_input.response_builder\
             .speak(speech_text)\
