@@ -50,14 +50,15 @@ def getCategoryId(category_string):
     else:
         return -1
 
-def handleUserGuess():
+def handleUserGuess(handler_input):
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
     correct_index = session_attributes['current_index']
 
     return
 
-def readQuestionAndShuffledAnswers():
+def readQuestionAndShuffledAnswers(handler_input):
+    session_attributes = handler_input.attributes_manager.session_attributes
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
     speech_text = f"{session_attributes['players'][player_index]}, you're up first. Question {question_index + 1}. "
@@ -213,7 +214,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes['current_player_index'] = 0
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
-        speech_text += readQuestionAndShuffledAnswers()
+        speech_text += readQuestionAndShuffledAnswers(handler_input)
         
         handler_input.response_builder\
             .speak(speech_text)\
