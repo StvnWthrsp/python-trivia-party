@@ -53,8 +53,42 @@ def getCategoryId(category_string):
 def handleUserGuess(handler_input):
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
-    correct_index = session_attributes['current_index']
+    correct_index = session_attributes['correct_index']
 
+    # Check if player answered correctly, iterate score if so
+    player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
+    if player_guess == (correct_index + 1):
+        session_attributes['scores'][player_index] += 1
+        speech_text = f"That answer is correct! "
+    else:
+        speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']} "
+
+    # Check if we need to go back to the first player
+    if player_index == (len(session_attributes['players']) - 1):
+        player_index = 0
+    else:
+        player_index += 1
+
+    # Check end-of-game conditions
+    if question_index == (len(session_attributes['game_questions']) - 1):
+        winner_index = 0
+        winning_score = 0
+        for index, score in enumerate(session_attributes['scores']):
+            if score > winning_score:
+                winning_score = score
+                winning_index = index
+        speech_text += f"The game is now over. The winner is {session_attributes['players'][winning_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
+
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .set_card(SimpleCard(SKILL_NAME, speech_text))\
+            .set_should_end_session(True)
+        return handler_input.response_builder.response
+    
+    # If game is not over, continue to ask questions
+    session_attributes['current_player_index'] = player_index
+    session_attributes['current_question_index'] += 1
+    readQuestionAndShuffledAnswers(handler_input)
     return
 
 def readQuestionAndShuffledAnswers(handler_input):
@@ -158,7 +192,50 @@ class AnswerIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
 
     def handle(self, handler_input):
-        return
+        session_attributes = handler_input.attributes_manager.session_attributes
+        player_index = session_attributes['current_player_index']
+        question_index = session_attributes['current_question_index']
+        correct_index = session_attributes['correct_index']
+
+        # Check if player answered correctly, iterate score if so
+        player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
+        if player_guess == (correct_index + 1):
+            session_attributes['scores'][player_index] += 1
+            speech_text = f"That answer is correct! "
+        else:
+            speech_text = f"That answer is wrong. The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']} "
+
+        # Check if we need to go back to the first player
+        if player_index == (len(session_attributes['players']) - 1):
+            player_index = 0
+        else:
+            player_index += 1
+
+        # Check end-of-game conditions
+        if question_index == (len(session_attributes['game_questions']) - 1):
+            winner_index = 0
+            winning_score = 0
+            for index, score in enumerate(session_attributes['scores']):
+                if score > winning_score:
+                    winning_score = score
+                    winning_index = index
+            speech_text += f"The game is now over. The winner is {session_attributes['players'][winning_index]}! Thanks for playing. If you'd like to play again, say, \"open Trivia Party\". "
+
+            handler_input.response_builder\
+                .speak(speech_text)\
+                .set_card(SimpleCard(SKILL_NAME, speech_text))\
+                .set_should_end_session(True)
+            return handler_input.response_builder.response
+        
+        # If game is not over, continue to ask questions
+        session_attributes['current_player_index'] = player_index
+        session_attributes['current_question_index'] += 1
+        speech_text += readQuestionAndShuffledAnswers(handler_input)
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .set_card(SimpleCard(SKILL_NAME, speech_text))\
+            .set_should_end_session(True)
+        return handler_input.response_builder.response
 
 class PlayersDoneIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -212,6 +289,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes['game_questions'] = getGameQuestions(category_id, NUMBER_OF_QUESTIONS*len(session_attributes['players']))
         session_attributes['current_question_index'] = 0
         session_attributes['current_player_index'] = 0
+        session_attributes['scores'] = [0, 0, 0, 0]
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
         speech_text += readQuestionAndShuffledAnswers(handler_input)
