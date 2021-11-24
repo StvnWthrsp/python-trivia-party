@@ -195,7 +195,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
         player_guess = None
 
         if is_intent_name("AnswerIntent")(handler_input):
-            player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
+            player_guess = handler_input.request_envelope.request.intent.slots['Answer'].resolutions.resolutionsPerAuthority[0].values[0].value.name
 
         # Check if player answered correctly, iterate score if so.
         if is_intent_name("DontKnowIntent")(handler_input):
