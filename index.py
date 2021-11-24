@@ -195,7 +195,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
         player_guess = None
 
         if is_intent_name("AnswerIntent")(handler_input):
-            player_guess = handler_input.request_envelope.request.intent.slots['Answer'].resolutions.resolutionsPerAuthority[0].values[0].value.name
+            player_guess = handler_input.request_envelope.request.intent.slots['Answer'].resolutions.resolutions_per_authority[0].values[0].value.name
 
         # Check if player answered correctly, iterate score if so.
         if is_intent_name("DontKnowIntent")(handler_input):
@@ -280,7 +280,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
 
         # Get category ID from string in the intent's slot
         # category_string = handler_input.request_envelope.request.intent.slots['Category'].value
-        category_string = handler_input.request_envelope.request.intent.slots['Category'].resolutions.resolutionsPerAuthority[0].values[0].value.name
+        category_string = handler_input.request_envelope.request.intent.slots['Category'].resolutions.resolutions_per_authority[0].values[0].value.name
         category_id = getCategoryId(category_string)
         if category_id == None:
             speech_text = "Sorry, something went wrong. Please choose a valid category. "
