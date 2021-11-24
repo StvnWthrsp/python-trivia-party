@@ -343,7 +343,7 @@ class WhoseTurnIntentHandler(AbstractRequestHandler):
         player_index = session_attributes['current_player_index']
         player_name = session_attributes['players'][player_index]
 
-        speech_text = f"It is currently {}'s turn. "
+        speech_text = f"It is currently {player_name}'s turn. "
         speech_text += session_attributes['speech_text']
         reprompt_text = session_attributes['reprompt_text']
         handler_input.response_builder\
