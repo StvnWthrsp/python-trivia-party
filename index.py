@@ -453,7 +453,8 @@ class NoIntentHandler(AbstractRequestHandler):
 
         # If player wants to stop, change game state back to "STARTED" and repeat the message from prior to StopIntent/CancelIntent
         if session_attributes['game_state'] == "WANTS_TO_STOP":
-            session_attributes['game_state'] = "STARTED"
+            session_attributes['game_state'] = session_attributes['previous_state']
+            del session_attributes['previous_state']
         
         # Otherwise, "No" is not a valid response. Respond similar to a RepeatIntent.
         reprompt_text = session_attributes['reprompt_text']
@@ -474,6 +475,7 @@ class StopIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = "Would you like to quit playing? "
         reprompt_text = speech_text
+        session_attributes['previous_state'] = session_attributes['game_state']
         session_attributes['game_state'] = "WANTS_TO_STOP"
         handler_input.response_builder\
             .speak(speech_text)\
