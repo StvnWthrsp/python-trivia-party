@@ -279,9 +279,10 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
 
         # Get category ID from string in the intent's slot
-        category_string = handler_input.request_envelope.request.intent.slots['Category'].value
+        # category_string = handler_input.request_envelope.request.intent.slots['Category'].value
+        category_string = handler_input.request_envelope.request.intent.slots['Category'].resolutions.resolutionsPerAuthority[0].values[0].value.name
         category_id = getCategoryId(category_string)
-        if category_id < 0:
+        if category_id == None:
             speech_text = "Sorry, something went wrong. Please choose a valid category. "
             reprompt_text = "Which category would you like to play? You can also play general trivia. "
             session_attributes['reprompt_text'] = reprompt_text
