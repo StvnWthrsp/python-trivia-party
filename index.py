@@ -16,6 +16,19 @@ sb = SkillBuilder()
 
 SKILL_NAME = "Trivia Party"
 NUMBER_OF_QUESTIONS = 5
+CATEGORIES = {
+    'general': 9,
+    'books': 10,
+    'film': 11,
+    'music': 12,
+    'television': 14,
+    'video games': 15,
+    'science': 17,
+    'math': 19,
+    'history': 23,
+    'geography': 22,
+    'animal': 27
+}
 
 # --------------------
 # Helper Functions
@@ -28,36 +41,38 @@ def getGameQuestions(category_number, number_questions):
     return data["results"]
 
 def getCategoryId(category_string):
-    if category_string == "general":
-        return 9
-    elif category_string == "books":
-        return 10
-    elif category_string == "film":
-        return 11
-    elif category_string == "music":
-        return 12
-    elif category_string == "television" or category_string == "TV":
-        return 14
-    elif category_string == "video games":
-        return 15
-    elif category_string == "science":
-        return 17
-    elif category_string == "math":
-        return 19
-    elif category_string == "history":
-        return 23
-    elif category_string == "geography":
-        return 22
-    elif category_string == "animal" or category_string == "animals":
-        return 27
-    else:
-        return -1
+    # if category_string == "general":
+    #     return 9
+    # elif category_string == "books":
+    #     return 10
+    # elif category_string == "film":
+    #     return 11
+    # elif category_string == "music":
+    #     return 12
+    # elif category_string == "television" or category_string == "TV":
+    #     return 14
+    # elif category_string == "video games":
+    #     return 15
+    # elif category_string == "science":
+    #     return 17
+    # elif category_string == "math":
+    #     return 19
+    # elif category_string == "history":
+    #     return 23
+    # elif category_string == "geography":
+    #     return 22
+    # elif category_string == "animal" or category_string == "animals":
+    #     return 27
+    # else:
+    #     return -1
+    category_id = CATEGORIES.get(category_string)
+    return category_id
 
 def readQuestionAndShuffledAnswers(handler_input):
     session_attributes = handler_input.attributes_manager.session_attributes
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
-    speech_text = f"{session_attributes['players'][player_index]}, it's your turn. Question {question_index + 1}. "
+    speech_text = f"{session_attributes['players'][player_index]}, it's your turn. Question {question_index + 1}.\n"
     reprompt_text = f"{session_attributes['game_questions'][question_index]['question']} "
 
     possible_answers = session_attributes['game_questions'][question_index]['incorrect_answers']
@@ -67,10 +82,13 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes['correct_index'] = correct_index
 
     for answer in possible_answers:
-        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}. "
+        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}.\n "
     speech_text += reprompt_text
     return speech_text
 
+# --------------------
+# Request Handlers (not Intents)
+# --------------------
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
@@ -165,7 +183,7 @@ class NameIntentHandler(AbstractRequestHandler):
 class AnswerIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return is_intent_name("AnswerIntent")(handler_input)\
+        return ( is_intent_name("AnswerIntent")(handler_input) or is_intent_name("DontKnowIntent")(handler_input) )\
             and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
 
     def handle(self, handler_input):
@@ -174,9 +192,15 @@ class AnswerIntentHandler(AbstractRequestHandler):
         question_index = session_attributes['current_question_index']
         correct_index = session_attributes['correct_index']
 
-        # Check if player answered correctly, iterate score if so
-        player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
-        if int(player_guess) == (correct_index + 1):
+        player_guess = None
+
+        if is_intent_name("AnswerIntent")(handler_input):
+            player_guess = handler_input.request_envelope.request.intent.slots['Answer'].value
+
+        # Check if player answered correctly, iterate score if so.
+        if is_intent_name("DontKnowIntent")(handler_input):
+            speech_text = f"The correct answer is {session_attributes['game_questions'][question_index]['correct_answer']}. "
+        elif int(player_guess) == (correct_index + 1):
             session_attributes['scores'][player_index] += 1
             speech_text = f"That answer is correct! "
         else:
@@ -287,6 +311,47 @@ class CategoryIntentHandler(AbstractRequestHandler):
             .set_should_end_session(False)
         return handler_input.response_builder.response
 
+class GetCategoriesIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("GetCategoriesIntent")(handler_input)\
+            and handler_input.attributes_manager.session_attributes['game_state'] == "CATEGORY"
+
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        speech_text = f"The available categories are:\n"
+        for category in CATEGORIES:
+            speech_text += f"{category}\n"
+        reprompt_text = "Which category would you like to play? "
+        session_attributes['speech_text'] = speech_text
+        session_attributes['reprompt_text'] = reprompt_text
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, speech_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
+
+class WhoseTurnIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("WhoseTurnIntent")(handler_input)\
+            and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
+
+    def handle(self, handler_input):
+        session_attributes = handler_input.attributes_manager.session_attributes
+        player_index = session_attributes['current_player_index']
+        player_name = session_attributes['players'][player_index]
+
+        speech_text = f"It is currently {}'s turn. "
+        speech_text += session_attributes['speech_text']
+        reprompt_text = session_attributes['reprompt_text']
+        handler_input.response_builder\
+            .speak(speech_text)\
+            .ask(reprompt_text)\
+            .set_card(SimpleCard(SKILL_NAME, speech_text))\
+            .set_should_end_session(False)
+        return handler_input.response_builder.response
 # --------------------
 # Built-In Intents
 # --------------------
@@ -436,13 +501,15 @@ class UnhandledIntentHandler(AbstractRequestHandler):
             .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
-        
+
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_request_handler(NameIntentHandler())
 sb.add_request_handler(AnswerIntentHandler())
 sb.add_request_handler(PlayersDoneIntentHandler())
 sb.add_request_handler(CategoryIntentHandler())
+sb.add_request_handler(GetCategoriesIntentHandler())
+sb.add_request_handler(WhoseTurnIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
 sb.add_request_handler(RepeatIntentHandler())
