@@ -72,8 +72,8 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes = handler_input.attributes_manager.session_attributes
     player_index = session_attributes['current_player_index']
     question_index = session_attributes['current_question_index']
-    speech_text = f"{session_attributes['players'][player_index]}, it's your turn. Question {question_index + 1}.\n"
-    reprompt_text = f"{session_attributes['game_questions'][question_index]['question']} "
+    speech_text = f"{session_attributes['players'][player_index]}, it's your turn. "
+    question_text = f"Question {question_index + 1}.\n{session_attributes['game_questions'][question_index]['question']} "
 
     possible_answers = session_attributes['game_questions'][question_index]['incorrect_answers']
     possible_answers.append(session_attributes['game_questions'][question_index]['correct_answer'])
@@ -82,9 +82,9 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes['correct_index'] = correct_index
 
     for answer in possible_answers:
-        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}.\n"
-    speech_text += reprompt_text
-    return speech_text
+        question_text += f"{possible_answers.index(answer)+1}. {answer}.\n"
+    speech_text += question_text
+    return speech_text, question_text
 
 # --------------------
 # Request Handlers (not Intents)
@@ -231,9 +231,10 @@ class AnswerIntentHandler(AbstractRequestHandler):
         # If game is not over, continue to ask questions
         session_attributes['current_player_index'] = player_index
         session_attributes['current_question_index'] += 1
-        speech_text += readQuestionAndShuffledAnswers(handler_input)
+        speech, question = readQuestionAndShuffledAnswers(handler_input)
+        speech_text += speech
         reprompt_text = f"What is your answer? You can also ask me to repeat the question. "
-        session_attributes['speech_text'] = speech_text
+        session_attributes['speech_text'] = question
         session_attributes['reprompt_text'] = reprompt_text
         handler_input.response_builder\
             .speak(speech_text)\
@@ -299,9 +300,10 @@ class CategoryIntentHandler(AbstractRequestHandler):
         session_attributes['game_state'] = "STARTED"
 
         speech_text = f"Okay, we'll play {category_string} trivia. Let's begin the game! "
-        speech_text += readQuestionAndShuffledAnswers(handler_input)
+        speech, question = readQuestionAndShuffledAnswers(handler_input)
+        speech_text += speech
         reprompt_text = f"What is your answer? You can also ask me to repeat the question. "
-        session_attributes['speech_text'] = speech_text
+        session_attributes['speech_text'] = question
         session_attributes['reprompt_text'] = reprompt_text
         
         handler_input.response_builder\
@@ -352,6 +354,7 @@ class WhoseTurnIntentHandler(AbstractRequestHandler):
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
+
 # --------------------
 # Built-In Intents
 # --------------------
@@ -370,6 +373,15 @@ class HelpIntentHandler(AbstractRequestHandler):
             .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
         return handler_input.response_builder.response
+
+# TODO: StartOverIntentHandler not yet implemented
+class StartOverIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return is_intent_name("AMAZON.StartOverIntent")(handler_input)
+
+    def handle(self, handler_input):
+        return
 
 class FallbackIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
