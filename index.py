@@ -82,7 +82,7 @@ def readQuestionAndShuffledAnswers(handler_input):
     session_attributes['correct_index'] = correct_index
 
     for answer in possible_answers:
-        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}.\n "
+        reprompt_text += f"{possible_answers.index(answer)+1}. {answer}.\n"
     speech_text += reprompt_text
     return speech_text
 
@@ -321,7 +321,7 @@ class GetCategoriesIntentHandler(AbstractRequestHandler):
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = f"The available categories are:\n"
         for category in CATEGORIES:
-            speech_text += f"{category}\n"
+            speech_text += f"{category}.\n"
         reprompt_text = "Which category would you like to play? "
         session_attributes['speech_text'] = speech_text
         session_attributes['reprompt_text'] = reprompt_text
