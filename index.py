@@ -96,6 +96,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
+        print(f"REQUEST: {handler_input}")
         speech_text = f"Welcome to {SKILL_NAME}! This game can be played with one to four players. I will ask each of you {NUMBER_OF_QUESTIONS} questions, try to get as many right as you can. Just respond with the number of your answer. If you need me to repeat anything, say, repeat. Ready? Let\'s begin. What is the first player's name? "
         reprompt_text = "What is the first player's name? "
 
@@ -112,6 +113,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class SessionEndedRequestHandler(AbstractRequestHandler):
@@ -120,7 +122,9 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
         return is_request_type("SessionEndedRequest")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         print(f"Session ended with reason: {handler_input.request_envelope.request.reason}")
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 # --------------------
@@ -133,6 +137,7 @@ class NameIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "PLAYERS"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         if "players" in session_attributes:
             num_players = len(session_attributes['players'])
@@ -162,6 +167,7 @@ class NameIntentHandler(AbstractRequestHandler):
                 .ask(reprompt_text)\
                 .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
                 .set_should_end_session(False)
+            print(f"RESPONSE: {handler_input.response_builder.response}")
             return handler_input.response_builder.response
 
         elif num_players > 4:
@@ -171,6 +177,7 @@ class NameIntentHandler(AbstractRequestHandler):
                 .ask(session_attributes['reprompt_text'])\
                 .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
                 .set_should_end_session(False)
+            print(f"RESPONSE: {handler_input.response_builder.response}")
             return handler_input.response_builder.response
 
         handler_input.response_builder\
@@ -178,6 +185,7 @@ class NameIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class AnswerIntentHandler(AbstractRequestHandler):
@@ -187,6 +195,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         player_index = session_attributes['current_player_index']
         question_index = session_attributes['current_question_index']
@@ -226,6 +235,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
                 .speak(speech_text)\
                 .set_card(SimpleCard(SKILL_NAME, speech_text))\
                 .set_should_end_session(True)
+            print(f"RESPONSE: {handler_input.response_builder.response}")
             return handler_input.response_builder.response
         
         # If game is not over, continue to ask questions
@@ -241,6 +251,7 @@ class AnswerIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class PlayersDoneIntentHandler(AbstractRequestHandler):
@@ -250,6 +261,7 @@ class PlayersDoneIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "PLAYERS"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = ""
         if len(session_attributes['players']) == 1:
@@ -267,6 +279,7 @@ class PlayersDoneIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text+reprompt_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class CategoryIntentHandler(AbstractRequestHandler):
@@ -276,6 +289,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "CATEGORY"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
 
         # Get category ID from string in the intent's slot
@@ -312,6 +326,7 @@ class CategoryIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class GetCategoriesIntentHandler(AbstractRequestHandler):
@@ -321,6 +336,7 @@ class GetCategoriesIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "CATEGORY"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = f"The available categories are:\n"
         for category in CATEGORIES:
@@ -333,6 +349,7 @@ class GetCategoriesIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class WhoseTurnIntentHandler(AbstractRequestHandler):
@@ -342,6 +359,7 @@ class WhoseTurnIntentHandler(AbstractRequestHandler):
             and handler_input.attributes_manager.session_attributes['game_state'] == "STARTED"
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         player_index = session_attributes['current_player_index']
         player_name = session_attributes['players'][player_index]
@@ -354,6 +372,7 @@ class WhoseTurnIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 # --------------------
@@ -365,6 +384,7 @@ class HelpIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.HelpIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         reprompt_text = session_attributes['reprompt_text']
         speech_text = f"'I will ask you {NUMBER_OF_QUESTIONS} multiple choice questions. Respond with the number of the answer. For example, say one, two, three, or four. To start a new game at any time, say, new game. If you need to hear something again, say, repeat. "
@@ -373,6 +393,7 @@ class HelpIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 # TODO: StartOverIntentHandler not yet implemented
@@ -390,6 +411,7 @@ class FallbackIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.FallbackIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         reprompt_text = session_attributes['reprompt_text']
         speech_text = f"Sorry, I didn't understand that. {reprompt_text}"
@@ -398,6 +420,7 @@ class FallbackIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class RepeatIntentHandler(AbstractRequestHandler):
@@ -406,6 +429,7 @@ class RepeatIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.RepeatIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         reprompt_text = session_attributes['reprompt_text']
         speech_text = session_attributes['speech_text']
@@ -414,6 +438,7 @@ class RepeatIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class YesIntentHandler(AbstractRequestHandler):
@@ -422,6 +447,7 @@ class YesIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.YesIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
 
         # If player wants to stop, end the game.
@@ -431,6 +457,7 @@ class YesIntentHandler(AbstractRequestHandler):
                 .speak(speech_text)\
                 .set_card(SimpleCard(SKILL_NAME, speech_text))\
                 .set_should_end_session(True)
+            print(f"RESPONSE: {handler_input.response_builder.response}")
             return handler_input.response_builder.response
         
         # Otherwise, "Yes" is not a valid response. Respond similar to a RepeatIntent.
@@ -441,6 +468,7 @@ class YesIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class NoIntentHandler(AbstractRequestHandler):
@@ -449,6 +477,7 @@ class NoIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.NoIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
 
         # If player wants to stop, change game state back to "STARTED" and repeat the message from prior to StopIntent/CancelIntent
@@ -464,6 +493,7 @@ class NoIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class StopIntentHandler(AbstractRequestHandler):
@@ -472,6 +502,7 @@ class StopIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.StopIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = "Would you like to quit playing? "
         reprompt_text = speech_text
@@ -482,6 +513,7 @@ class StopIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class CancelIntentHandler(AbstractRequestHandler):
@@ -490,6 +522,7 @@ class CancelIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.CancelIntent")(handler_input)
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         speech_text = "Would you like to quit playing? "
         reprompt_text = speech_text
@@ -499,6 +532,7 @@ class CancelIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, speech_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 class UnhandledIntentHandler(AbstractRequestHandler):
@@ -507,6 +541,7 @@ class UnhandledIntentHandler(AbstractRequestHandler):
         return True
 
     def handle(self, handler_input):
+        print(f"REQUEST: {handler_input}")
         session_attributes = handler_input.attributes_manager.session_attributes
         reprompt_text = session_attributes['reprompt_text']
         speech_text = f"Sorry, I didn't understand that. {reprompt_text}"
@@ -515,6 +550,7 @@ class UnhandledIntentHandler(AbstractRequestHandler):
             .ask(reprompt_text)\
             .set_card(SimpleCard(SKILL_NAME, reprompt_text))\
             .set_should_end_session(False)
+        print(f"RESPONSE: {handler_input.response_builder.response}")
         return handler_input.response_builder.response
 
 sb.add_request_handler(LaunchRequestHandler())
